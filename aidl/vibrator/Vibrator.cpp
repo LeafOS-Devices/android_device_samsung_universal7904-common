@@ -279,8 +279,6 @@ uint32_t Vibrator::effectToMs(Effect effect, ndk::ScopedAStatus* status) {
     switch (effect) {
         case Effect::CLICK:
             return 40;
-        case Effect::DOUBLE_CLICK:
-            return 50;
         case Effect::TICK:
         case Effect::TEXTURE_TICK:
         case Effect::THUD:
