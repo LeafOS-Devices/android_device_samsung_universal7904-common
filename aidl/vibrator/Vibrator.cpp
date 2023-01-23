@@ -122,6 +122,11 @@ ndk::ScopedAStatus Vibrator::perform(Effect effect, EffectStrength strength, con
             return status;
     }
 
+    if (effect == Effect::DOUBLE_CLICK) {
+        activate(ms);
+        usleep(150000);
+    }
+
     status = activate(ms);
 
     if (callback != nullptr) {
