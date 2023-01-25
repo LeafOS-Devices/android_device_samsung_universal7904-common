@@ -101,14 +101,16 @@ ndk::ScopedAStatus Vibrator::on(int32_t timeoutMs, const std::shared_ptr<IVibrat
 
 ndk::ScopedAStatus Vibrator::perform(Effect effect, EffectStrength strength, const std::shared_ptr<IVibratorCallback>& callback, int32_t* _aidl_return) {
     ndk::ScopedAStatus status;
-    uint32_t amplitude = strengthToAmplitude(strength, &status);
+    uint32_t intensity = strengthToAmplitude(strength, &status);
     uint32_t ms = 1000;
 
     if (!status.isOk())
         return status;
 
     activate(0);
-    setAmplitude(amplitude);
+
+    if (mHasTimedOutIntensity)
+        writeNode(VIBRATOR_INTENSITY_PATH, intensity);
 
     if (mHasTimedOutEffect && CP_TRIGGER_EFFECTS.find(effect) != CP_TRIGGER_EFFECTS.end()) {
         writeNode(VIBRATOR_CP_TRIGGER_PATH, CP_TRIGGER_EFFECTS[effect]);
@@ -157,20 +159,13 @@ ndk::ScopedAStatus Vibrator::getSupportedEffects(std::vector<Effect>* _aidl_retu
 ndk::ScopedAStatus Vibrator::setAmplitude(float amplitude) {
     uint32_t intensity;
 
-    if (amplitude == 0) {
-        return ndk::ScopedAStatus::fromExceptionCode(EX_ILLEGAL_ARGUMENT);
+    if (amplitude <= 0.0f || amplitude > 1.0f) {
+        return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_ILLEGAL_ARGUMENT));
     }
 
-    LOG(DEBUG) << "Setting amplitude: " << (uint32_t)amplitude;
+    LOG(DEBUG) << "Setting amplitude: " << amplitude;
 
-    intensity = std::lround((amplitude - 1) * INTENSITY_MAX / 254.0);
-    if (intensity > INTENSITY_MAX) {
-        intensity = INTENSITY_MAX;
-    }
-
-    if (intensity == 0) {
-        return ndk::ScopedAStatus::fromExceptionCode(EX_ILLEGAL_ARGUMENT);
-    }
+    intensity = amplitude * INTENSITY_MAX;
 
     LOG(DEBUG) << "Setting intensity: " << intensity;
 
@@ -275,11 +270,11 @@ uint8_t Vibrator::strengthToAmplitude(EffectStrength strength, ndk::ScopedAStatu
 
     switch (strength) {
         case EffectStrength::LIGHT:
-            return 64;
+            return INTENSITY_LIGHT;
         case EffectStrength::MEDIUM:
-            return 128;
+            return INTENSITY_MEDIUM;
         case EffectStrength::STRONG:
-            return 255;
+            return INTENSITY_STRONG;
     }
 
     *status = ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION);

@@ -12,6 +12,10 @@
 #define INTENSITY_MAX 10000
 #define INTENSITY_DEFAULT INTENSITY_MAX
 
+#define INTENSITY_LIGHT 2480
+#define INTENSITY_MEDIUM 5000
+#define INTENSITY_STRONG INTENSITY_MAX
+
 #define VIBRATOR_TIMEOUT_PATH "/sys/class/timed_output/vibrator/enable"
 #define VIBRATOR_INTENSITY_PATH "/sys/class/timed_output/vibrator/intensity"
 #define VIBRATOR_CP_TRIGGER_PATH "/sys/class/timed_output/vibrator/cp_trigger_index"
