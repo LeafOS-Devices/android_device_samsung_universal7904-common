@@ -46,8 +46,9 @@ function blob_fixup {
 		grep -q libshim_audioparams.so "$2" || "$PATCHELF" --add-needed libshim_audioparams.so "$2"
 		sed -i 's/str_parms_get_str/str_parms_get_mod/g' "$2"
 		;;
-	vendor/lib64/hw/hwcomposer.exynos7904.so)
+	vendor/lib64/libexynosdisplay.so)
 		"$PATCHELF" --replace-needed "libutils.so" "libutils-v32.so" "$2"
+		sed -i 's/_ZN7android6Thread3runEPKcim/_ZN7utils326Thread3runEPKcim/g' "$2"
 		;;
 	esac
 }
